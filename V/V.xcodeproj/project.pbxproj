@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		48C9815BBDE8865DC49D6497 /* Pods_V.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CACFD7AC637A5AB0DE4C585A /* Pods_V.framework */; };
+		513D77761E36D15A000224DC /* ChatHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513D77751E36D15A000224DC /* ChatHelper.swift */; };
 		51DAA6581E341EC200D5B457 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DAA6571E341EC200D5B457 /* AppDelegate.swift */; };
 		51DAA65D1E341EC200D5B457 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51DAA65B1E341EC200D5B457 /* Main.storyboard */; };
 		51DAA65F1E341EC200D5B457 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51DAA65E1E341EC200D5B457 /* Assets.xcassets */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		513D77751E36D15A000224DC /* ChatHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatHelper.swift; path = Common/ChatHelper.swift; sourceTree = "<group>"; };
 		51DAA6541E341EC200D5B457 /* V.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = V.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51DAA6571E341EC200D5B457 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51DAA65C1E341EC200D5B457 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -44,6 +46,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		513D77741E36D13D000224DC /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				513D77751E36D15A000224DC /* ChatHelper.swift */,
+			);
+			name = Common;
+			sourceTree = "<group>";
+		};
 		51DAA64B1E341EC200D5B457 = {
 			isa = PBXGroup;
 			children = (
@@ -67,6 +77,7 @@
 			children = (
 				51DAA66C1E34279800D5B457 /* Storyboards */,
 				51DAA66B1E34278800D5B457 /* Controllers */,
+				513D77741E36D13D000224DC /* Common */,
 				51DAA6571E341EC200D5B457 /* AppDelegate.swift */,
 				51DAA65E1E341EC200D5B457 /* Assets.xcassets */,
 				51DAA6631E341EC200D5B457 /* Info.plist */,
@@ -237,6 +248,7 @@
 				51DAA66A1E34278200D5B457 /* LoginViewController.swift in Sources */,
 				51DAA66E1E3427FB00D5B457 /* ChatViewController.swift in Sources */,
 				51DAA6581E341EC200D5B457 /* AppDelegate.swift in Sources */,
+				513D77761E36D15A000224DC /* ChatHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

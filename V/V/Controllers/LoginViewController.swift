@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import FirebaseAuth
 
 
 class LoginViewController: UIViewController {
@@ -22,19 +21,7 @@ class LoginViewController: UIViewController {
     }
     
     @IBAction func loginAnonymously(_ sender: Any) {
-        FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
-            if error == nil {
-                print("UserID: \(user!.uid)")
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let navigationController = storyboard.instantiateViewController(withIdentifier: "NavigationController") as! UINavigationController
-                
-                let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                appDelegate.window?.rootViewController = navigationController
-            } else {
-                print(error!.localizedDescription)
-                return
-            }
-        })
+        ChatHelper.sharedInstance.loginAnonymously()
     }
 
 }
