@@ -7,8 +7,17 @@
 //
 
 import UIKit
+import JSQMessagesViewController
 
-class ChatViewController: UIViewController {
+
+class ChatViewController: JSQMessagesViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.senderId = "Me"
+        self.senderDisplayName = "ddApps"
+    }
 
     @IBAction func logout(_ sender: Any) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
