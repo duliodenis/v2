@@ -34,7 +34,9 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     override func didPressAccessoryButton(_ sender: UIButton!) {
-        print("Accessory Button Tapped")
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        present(imagePicker, animated: true)
     }
     
     
@@ -72,6 +74,21 @@ class ChatViewController: JSQMessagesViewController {
         let loginController = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.window?.rootViewController = loginController
+    }
+    
+}
+
+
+// MARK: - UIImagePickerControl Delegate Methods
+
+extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        let image = info[UIImagePickerControllerOriginalImage] as? UIImage
+        let photo = JSQPhotoMediaItem(image: image)
+        messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: photo))
+        collectionView.reloadData()
+        dismiss(animated: true)
     }
     
 }
