@@ -8,6 +8,7 @@
 
 import UIKit
 import JSQMessagesViewController
+import MobileCoreServices
 
 
 class ChatViewController: JSQMessagesViewController {
@@ -34,9 +35,31 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     override func didPressAccessoryButton(_ sender: UIButton!) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        present(imagePicker, animated: true)
+        // Put up an Action Sheet
+        let sheet = UIAlertController(title: "Media Messages", message: "Select the type of Media you want to message.", preferredStyle: .actionSheet)
+        // with cancel, phot, and video actions
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        let photo = UIAlertAction(title: "Photo", style: .default) { alert in
+            self.getMediaFrom(type: kUTTypeImage)
+        }
+        
+        let video = UIAlertAction(title: "Video", style: .default) { alert in
+            self.getMediaFrom(type: kUTTypeMovie)
+        }
+        // add the actions and present the sheet
+        sheet.addAction(cancel)
+        sheet.addAction(photo)
+        sheet.addAction(video)
+        present(sheet, animated: true)
+    }
+    
+    
+    func getMediaFrom(type: CFString) {
+        let mediaPicker = UIImagePickerController()
+        mediaPicker.delegate = self
+        mediaPicker.mediaTypes = [type as String]
+        self.present(mediaPicker, animated: true)
     }
     
     
@@ -84,10 +107,16 @@ class ChatViewController: JSQMessagesViewController {
 extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        let image = info[UIImagePickerControllerOriginalImage] as? UIImage
-        let photo = JSQPhotoMediaItem(image: image)
-        messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: photo))
-        collectionView.reloadData()
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            let photo = JSQPhotoMediaItem(image: image)
+            messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: photo))
+            collectionView.reloadData()
+        } else if let video = info[UIImagePickerControllerMediaURL] as? URL {
+            let videoItem = JSQVideoMediaItem(fileURL: video, isReadyToPlay: true)
+            messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: videoItem))
+            collectionView.reloadData()
+        }
+        
         dismiss(animated: true)
     }
     
