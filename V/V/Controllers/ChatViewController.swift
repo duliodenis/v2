@@ -9,6 +9,7 @@
 import UIKit
 import JSQMessagesViewController
 import MobileCoreServices
+import AVKit
 
 
 class ChatViewController: JSQMessagesViewController {
@@ -78,7 +79,6 @@ class ChatViewController: JSQMessagesViewController {
         return messages[indexPath.item]
     }
     
-    
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageBubbleImageDataForItemAt indexPath: IndexPath!) -> JSQMessageBubbleImageDataSource! {
         let bubbleFactory = JSQMessagesBubbleImageFactory()
         
@@ -87,6 +87,18 @@ class ChatViewController: JSQMessagesViewController {
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
         return nil
+    }
+    
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapMessageBubbleAt indexPath: IndexPath!) {
+        let message = messages[indexPath.item]
+        if message.isMediaMessage {
+            if let mediaItem = message.media as? JSQVideoMediaItem {
+                let player = AVPlayer(url: mediaItem.fileURL)
+                let playerVC = AVPlayerViewController()
+                playerVC.player = player
+                self.present(playerVC, animated: true)
+            }
+        }
     }
     
     
