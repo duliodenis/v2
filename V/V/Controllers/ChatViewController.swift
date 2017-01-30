@@ -10,6 +10,7 @@ import UIKit
 import JSQMessagesViewController
 import MobileCoreServices
 import AVKit
+import FirebaseDatabase
 
 
 class ChatViewController: JSQMessagesViewController {
@@ -17,6 +18,8 @@ class ChatViewController: JSQMessagesViewController {
     // messages array of JSQMessages
     var messages = [JSQMessage]()
     
+    // the root location of all the Messages
+    var messageRef = FIRDatabase.database().reference().child("messages")
     
     // MARK: - View Lifecycle
     
@@ -25,14 +28,32 @@ class ChatViewController: JSQMessagesViewController {
         
         senderId = "Me"
         senderDisplayName = "ddApps"
+        observeMessages()
+    }
+    
+    
+    // MARK: - Observe Messages Method
+    
+    func observeMessages() {
+        messageRef.observe(.childAdded, with: { snapshot in
+            if let message = snapshot.value as? [String: Any] {
+                let mediaType = message["MediaType"] as! String
+                let senderId = message["senderId"] as! String
+                let displayName = message["senderDisplayName"] as! String
+                let text = message["text"] as! String
+                self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, text: text))
+                self.collectionView.reloadData()
+            }
+        })
     }
     
     
     // MARK: - JSQMessagesVC Class Methods
     
     override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
-        messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, text: text))
-        collectionView.reloadData()
+        let message = messageRef.childByAutoId()
+        let messageData = ["text": text, "senderId": senderId, "senderDisplayName": senderDisplayName, "MediaType": "TEXT"]
+        message.setValue(messageData)
     }
     
     override func didPressAccessoryButton(_ sender: UIButton!) {
