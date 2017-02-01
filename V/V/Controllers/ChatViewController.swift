@@ -11,6 +11,8 @@ import JSQMessagesViewController
 import MobileCoreServices
 import AVKit
 import FirebaseDatabase
+import FirebaseStorage
+import FirebaseAuth
 
 
 class ChatViewController: JSQMessagesViewController {
@@ -85,6 +87,41 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     
+    func sendMedia(photo: UIImage?, video: URL?) {
+        if let photo = photo {
+            let filePath = "\(FIRAuth.auth()?.currentUser?.uid)/\(Date.timeIntervalSinceReferenceDate)"
+            let data = UIImageJPEGRepresentation(photo, 0.6)
+            let metadata = FIRStorageMetadata()
+            metadata.contentType = "image/jpg"
+            FIRStorage.storage().reference().child(filePath).put(data!, metadata: metadata) { (storageMetadata, error) in
+                if error != nil {
+                    print(error?.localizedDescription)
+                    return
+                }
+                let fileURL = metadata.downloadURLs?.first?.absoluteString
+                let message = self.messageRef.childByAutoId()
+                let messageData = ["fileURL": fileURL, "senderId": self.senderId, "senderDisplayName": self.senderDisplayName, "MediaType": "PHOTO"]
+                message.setValue(messageData)
+            }
+        } else if let video = video {
+            let filePath = "\(FIRAuth.auth()?.currentUser?.uid)/\(Date.timeIntervalSinceReferenceDate)"
+            let data = NSData(contentsOf: video) as! Data
+            let metadata = FIRStorageMetadata()
+            metadata.contentType = "video/mp4"
+            FIRStorage.storage().reference().child(filePath).put(data, metadata: metadata) { (storageMetadata, error) in
+                if error != nil {
+                    print(error?.localizedDescription)
+                    return
+                }
+                let fileURL = metadata.downloadURLs?.first?.absoluteString
+                let message = self.messageRef.childByAutoId()
+                let messageData = ["fileURL": fileURL, "senderId": self.senderId, "senderDisplayName": self.senderDisplayName, "MediaType": "VIDEO"]
+                message.setValue(messageData)
+            }
+        }
+    }
+    
+    
     // MARK: - JSQMessages Collection View Delegate Methods
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -144,10 +181,12 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
             let photo = JSQPhotoMediaItem(image: image)
             messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: photo))
             collectionView.reloadData()
+            sendMedia(photo: image, video: nil)
         } else if let video = info[UIImagePickerControllerMediaURL] as? URL {
             let videoItem = JSQVideoMediaItem(fileURL: video, isReadyToPlay: true)
             messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: videoItem))
             collectionView.reloadData()
+            sendMedia(photo: nil, video: video)
         }
         
         dismiss(animated: true)
