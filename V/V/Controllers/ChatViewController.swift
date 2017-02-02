@@ -42,8 +42,23 @@ class ChatViewController: JSQMessagesViewController {
                 let mediaType = message["MediaType"] as! String
                 let senderId = message["senderId"] as! String
                 let displayName = message["senderDisplayName"] as! String
-                let text = message["text"] as! String
-                self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, text: text))
+                
+                if mediaType == "TEXT" {
+                    let text = message["text"] as! String
+                    self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, text: text))
+                } else if mediaType == "PHOTO" {
+                    let fileURL = message["fileURL"] as! String
+                    let url = URL(string: fileURL)
+                    let data = NSData(contentsOf: url!) as! Data
+                    let photo = UIImage(data: data)
+                    let media = JSQPhotoMediaItem(image: photo)
+                    
+                    self.messages.append(JSQMessage(senderId: self.senderId, displayName: self.senderDisplayName, media: media))
+                    
+                } else if mediaType == "VIDEO" {
+                    print("video")
+                }
+                
                 self.collectionView.reloadData()
             }
         })
@@ -98,7 +113,8 @@ class ChatViewController: JSQMessagesViewController {
                     print(error?.localizedDescription)
                     return
                 }
-                let fileURL = metadata.downloadURLs?.first?.absoluteString
+                let fileURL = storageMetadata!.downloadURLs?.first?.absoluteString
+                
                 let message = self.messageRef.childByAutoId()
                 let messageData = ["fileURL": fileURL, "senderId": self.senderId, "senderDisplayName": self.senderDisplayName, "MediaType": "PHOTO"]
                 message.setValue(messageData)
@@ -113,7 +129,7 @@ class ChatViewController: JSQMessagesViewController {
                     print(error?.localizedDescription)
                     return
                 }
-                let fileURL = metadata.downloadURLs?.first?.absoluteString
+                let fileURL = storageMetadata?.downloadURLs?.first?.absoluteString
                 let message = self.messageRef.childByAutoId()
                 let messageData = ["fileURL": fileURL, "senderId": self.senderId, "senderDisplayName": self.senderDisplayName, "MediaType": "VIDEO"]
                 message.setValue(messageData)
