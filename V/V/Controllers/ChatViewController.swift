@@ -43,20 +43,30 @@ class ChatViewController: JSQMessagesViewController {
                 let senderId = message["senderId"] as! String
                 let displayName = message["senderDisplayName"] as! String
                 
-                if mediaType == "TEXT" {
+                switch mediaType {
+                    
+                case "TEXT":
                     let text = message["text"] as! String
                     self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, text: text))
-                } else if mediaType == "PHOTO" {
+                    
+                case "PHOTO":
                     let fileURL = message["fileURL"] as! String
                     let url = URL(string: fileURL)
                     let data = NSData(contentsOf: url!) as! Data
                     let photo = UIImage(data: data)
                     let media = JSQPhotoMediaItem(image: photo)
                     
-                    self.messages.append(JSQMessage(senderId: self.senderId, displayName: self.senderDisplayName, media: media))
+                    self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, media: media))
                     
-                } else if mediaType == "VIDEO" {
-                    print("video")
+                case "VIDEO":
+                    let fileURL = message["fileURL"] as! String
+                    let videoURL = URL(string: fileURL)
+                    let videoMedia = JSQVideoMediaItem(fileURL: videoURL, isReadyToPlay: true)
+                    
+                    self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, media: videoMedia))
+                    
+                default:
+                    print("Observed Message With Unknown Type")
                 }
                 
                 self.collectionView.reloadData()
