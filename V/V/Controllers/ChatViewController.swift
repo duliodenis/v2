@@ -28,7 +28,9 @@ class ChatViewController: JSQMessagesViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        senderId = "Me"
+        let currentUser = FIRAuth.auth()?.currentUser
+        senderId = currentUser?.uid
+        
         senderDisplayName = "ddApps"
         observeMessages()
     }
@@ -56,12 +58,24 @@ class ChatViewController: JSQMessagesViewController {
                     let photo = UIImage(data: data)
                     let media = JSQPhotoMediaItem(image: photo)
                     
+                    if self.senderId == senderId {
+                        media?.appliesMediaViewMaskAsOutgoing = true
+                    } else {
+                        media?.appliesMediaViewMaskAsOutgoing = false
+                    }
+                    
                     self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, media: media))
                     
                 case "VIDEO":
                     let fileURL = message["fileURL"] as! String
                     let videoURL = URL(string: fileURL)
                     let videoMedia = JSQVideoMediaItem(fileURL: videoURL, isReadyToPlay: true)
+                    
+                    if self.senderId == senderId {
+                        videoMedia?.appliesMediaViewMaskAsOutgoing = true
+                    } else {
+                        videoMedia?.appliesMediaViewMaskAsOutgoing = false
+                    }
                     
                     self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, media: videoMedia))
                     
@@ -81,6 +95,7 @@ class ChatViewController: JSQMessagesViewController {
         let message = messageRef.childByAutoId()
         let messageData = ["text": text, "senderId": senderId, "senderDisplayName": senderDisplayName, "MediaType": "TEXT"]
         message.setValue(messageData)
+        self.finishSendingMessage()
     }
     
     override func didPressAccessoryButton(_ sender: UIButton!) {
@@ -164,9 +179,14 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageBubbleImageDataForItemAt indexPath: IndexPath!) -> JSQMessageBubbleImageDataSource! {
+        let message = messages[indexPath.item]
         let bubbleFactory = JSQMessagesBubbleImageFactory()
         
-        return bubbleFactory?.outgoingMessagesBubbleImage(with: UIColor(red: 52/255, green: 73/255, blue: 94/255, alpha: 0.9))
+        if message.senderId == self.senderId {
+            return bubbleFactory?.outgoingMessagesBubbleImage(with: UIColor(red: 52/255, green: 73/255, blue: 94/255, alpha: 0.9))
+        } else {
+            return bubbleFactory?.incomingMessagesBubbleImage(with: UIColor(red: 149/255, green: 165/255, blue: 166/255, alpha: 0.9))
+        }
     }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
@@ -210,14 +230,8 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            let photo = JSQPhotoMediaItem(image: image)
-            messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: photo))
-            collectionView.reloadData()
             sendMedia(photo: image, video: nil)
         } else if let video = info[UIImagePickerControllerMediaURL] as? URL {
-            let videoItem = JSQVideoMediaItem(fileURL: video, isReadyToPlay: true)
-            messages.append(JSQMessage(senderId: senderId, displayName: senderDisplayName, media: videoItem))
-            collectionView.reloadData()
             sendMedia(photo: nil, video: video)
         }
         
