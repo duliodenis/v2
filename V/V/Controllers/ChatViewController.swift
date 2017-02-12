@@ -189,6 +189,12 @@ class ChatViewController: JSQMessagesViewController {
     // MARK: - Log out Method
 
     @IBAction func logout(_ sender: Any) {
+        do {
+            try FIRAuth.auth()?.signOut()
+        } catch let error {
+            print(error.localizedDescription)
+        }
+
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let loginController = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
