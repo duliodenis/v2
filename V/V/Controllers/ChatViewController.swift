@@ -28,10 +28,17 @@ class ChatViewController: JSQMessagesViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let currentUser = FIRAuth.auth()?.currentUser
-        senderId = currentUser?.uid
+        if let currentUser = FIRAuth.auth()?.currentUser {
+            if currentUser.isAnonymous == true {
+                senderDisplayName = "Anonymous"
+            } else {
+                if let displayName = currentUser.displayName {
+                    senderDisplayName = "\(displayName)"
+                }	
+            }
+            senderId = currentUser.uid
+        }
         
-        senderDisplayName = "ddApps"
         observeMessages()
     }
     

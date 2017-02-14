@@ -8,6 +8,7 @@
 
 import UIKit
 import FirebaseAuth
+import FirebaseDatabase
 
 
 class ChatHelper {
@@ -17,6 +18,13 @@ class ChatHelper {
         FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
             if error == nil {
                 print("UserID: \(user!.uid)")
+                
+                let newUser = FIRDatabase.database().reference().child("users").child((user?.uid)!)
+                newUser.setValue(["username": "Anonymous",
+                                  "id": "\(user!.uid)",
+                                  "profileImageURL": "",
+                                  "email": ""])
+                
                 self.switchToNavigationViewController()
             } else {
                 print(error!.localizedDescription)
