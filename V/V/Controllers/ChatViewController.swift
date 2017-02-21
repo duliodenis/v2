@@ -20,6 +20,9 @@ class ChatViewController: JSQMessagesViewController {
     // messages array of JSQMessages
     var messages = [JSQMessage]()
     
+    // dictionary of user avatars
+    var avatars = [String: JSQMessagesAvatarImage]()
+    
     // the root location of all the Messages
     var messageRef = FIRDatabase.database().reference().child("messages")
     
@@ -43,6 +46,34 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     
+    // MARK: - Observe User Method
+    
+    func observeUser(with id: String) {
+        FIRDatabase.database().reference().child("users").child(id).observe(.value, with: { snapshot in
+            if let userDictionary = snapshot.value as? [String:AnyObject] {
+                let imageURL = userDictionary["profileImageURL"] as! String
+                self.setupAvatar(with: imageURL, for: id)
+            }
+        })
+    }
+    
+    
+    // MARK: - Setup Avatar
+    
+    func setupAvatar(with imageURL: String, for messageID: String) {
+        if imageURL != "" {
+            let fileURL = URL(string: imageURL)
+            let data = NSData(contentsOf: fileURL!) as! Data
+            let image = UIImage(data: data)
+            let userImage = JSQMessagesAvatarImageFactory.avatarImage(with: image, diameter: 30)
+            avatars[messageID] = userImage
+        } else {
+            avatars[messageID] = JSQMessagesAvatarImageFactory.avatarImage(with: UIImage(named: "profileImage"), diameter: 30)
+        }
+        collectionView.reloadData()
+    }
+    
+    
     // MARK: - Observe Messages Method
     
     func observeMessages() {
@@ -51,6 +82,8 @@ class ChatViewController: JSQMessagesViewController {
                 let mediaType = message["MediaType"] as! String
                 let senderId = message["senderId"] as! String
                 let displayName = message["senderDisplayName"] as! String
+                
+                self.observeUser(with: senderId)
                 
                 switch mediaType {
                     
@@ -197,7 +230,8 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
-        return nil
+        let message = messages[indexPath.item]
+        return avatars[message.senderId]
     }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapMessageBubbleAt indexPath: IndexPath!) {
