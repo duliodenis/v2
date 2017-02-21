@@ -13,6 +13,7 @@ import AVKit
 import FirebaseDatabase
 import FirebaseStorage
 import FirebaseAuth
+import SDWebImage
 
 
 class ChatViewController: JSQMessagesViewController {
@@ -93,18 +94,17 @@ class ChatViewController: JSQMessagesViewController {
                     
                 case "PHOTO":
                     let fileURL = message["fileURL"] as! String
-                    let url = URL(string: fileURL)
-                    let data = NSData(contentsOf: url!) as! Data
-                    let photo = UIImage(data: data)
-                    let media = JSQPhotoMediaItem(image: photo)
+                    let photo = JSQPhotoMediaItem(image: nil)
                     
-                    if self.senderId == senderId {
-                        media?.appliesMediaViewMaskAsOutgoing = true
-                    } else {
-                        media?.appliesMediaViewMaskAsOutgoing = false
-                    }
+                    let downloader = SDWebImageDownloader.shared()
+                    downloader.downloadImage(with: URL(string: fileURL), options: [], progress: nil, completed: { (image, data, error, finished) in
+                        DispatchQueue.main.async {
+                            photo?.image = image
+                            self.collectionView.reloadData()
+                        }
+                    })
                     
-                    self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, media: media))
+                    self.messages.append(JSQMessage(senderId: senderId, displayName: displayName, media: photo))
                     
                 case "VIDEO":
                     let fileURL = message["fileURL"] as! String
